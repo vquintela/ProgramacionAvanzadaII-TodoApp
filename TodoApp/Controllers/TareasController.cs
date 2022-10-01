@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Context;
 using TodoApp.Models;
+using TodoApp.Services;
 
 namespace TodoApp.Controllers
 {
@@ -14,20 +15,20 @@ namespace TodoApp.Controllers
     [ApiController]
     public class TareasController : ControllerBase
     {
-        private readonly TodoAppContext _context;
+        private readonly ITareaService _tareaService;
 
-        public TareasController(TodoAppContext context)
+        public TareasController(ITareaService tareaService)
         {
-            _context = context;
+            _tareaService = tareaService;
         }
 
         // GET: api/Tareas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tarea>>> Gettarea()
+        public async Task<IActionResult> GetTareas()
         {
             try
             {
-                return await _context.tareas.Include(d => d.Materia).ToListAsync();
+                return Ok(await _tareaService.GetAllTareasAsync());
             }
             catch (Exception e)
             {
@@ -43,11 +44,11 @@ namespace TodoApp.Controllers
 
         // GET: api/Tareas/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tarea>> GetTarea(long id)
+        public async Task<IActionResult> GetTarea(long id)
         {
             try
             {
-                var tarea = await _context.tareas.Include(d => d.Materia).FirstOrDefaultAsync(p => p.TareaId == id);
+                var tarea = await _tareaService.GetTarea(id);
 
                 if (tarea == null)
                 {
@@ -60,7 +61,7 @@ namespace TodoApp.Controllers
                    );
                 }
 
-                return tarea;
+                return Ok(tarea);
             }
             catch (Exception e)
             {
@@ -89,40 +90,30 @@ namespace TodoApp.Controllers
                 );
             }
 
-            _context.Entry(tarea).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _tareaService.PutTarea(id, tarea);
                 return Ok("OK");
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TareaExists(id))
-                {
-                    return NotFound(
-                        new ErrorResponse() 
-                        { 
-                            Codigo = 404, 
-                            Error = "Tarea no encontrada" 
-                        }
-                    );
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(
+                    new ErrorResponse()
+                    {
+                        Codigo = 500,
+                        Error = "Error al actualizar la base de datos"
+                    }
+                );
             }
         }
 
         // POST: api/Tareas
         [HttpPost]
-        public async Task<ActionResult<Tarea>> PostTarea(Tarea tarea)
+        public async Task<IActionResult> PostTarea(Tarea tarea)
         {
             try
             {
-                _context.tareas.Add(tarea);
-                await _context.SaveChangesAsync();
+                await _tareaService.SaveTarea(tarea);
 
                 return CreatedAtAction("GetTarea", new { id = tarea.TareaId }, tarea);
             }
@@ -144,7 +135,7 @@ namespace TodoApp.Controllers
         {
             try
             {
-                var tarea = await _context.tareas.FindAsync(id);
+                var tarea = await _tareaService.GetTarea(id);
                 if (tarea == null)
                 {
                     return NotFound(
@@ -156,8 +147,7 @@ namespace TodoApp.Controllers
                    );
                 }
 
-                _context.tareas.Remove(tarea);
-                await _context.SaveChangesAsync();
+                await _tareaService.DeleteTarea(id);
 
                 return Ok("OK");
             }
@@ -171,11 +161,6 @@ namespace TodoApp.Controllers
                     }
                 );
             }
-        }
-
-        private bool TareaExists(long id)
-        {
-            return _context.tareas.Any(e => e.TareaId == id);
         }
     }
 }

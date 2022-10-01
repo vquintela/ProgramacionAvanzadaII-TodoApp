@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Context;
 using TodoApp.Models;
+using TodoApp.Services;
 
 namespace TodoApp.Controllers
 {
@@ -14,20 +15,20 @@ namespace TodoApp.Controllers
     [ApiController]
     public class MateriasController : ControllerBase
     {
-        private readonly TodoAppContext _context;
+        private readonly IMateriaService _materiaService;
 
-        public MateriasController(TodoAppContext context)
+        public MateriasController(IMateriaService materiaService)
         {
-            _context = context;
+            _materiaService = materiaService;
         }
 
         // GET: api/Materias
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Materia>>> Getmateria()
+        public async Task<IActionResult> GetMaterias()
         {
             try
             {
-                return await _context.materias.Include(d => d.Tareas).ToListAsync();
+                return Ok(await _materiaService.GetAllMateriasAsync());
             }
             catch (Exception e)
             {
@@ -43,11 +44,11 @@ namespace TodoApp.Controllers
 
         // GET: api/Materias/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Materia>> GetMateria(long id)
+        public async Task<IActionResult> GetMateria(long id)
         {
             try
             {
-                var materia = await _context.materias.Include(d => d.Tareas).FirstOrDefaultAsync(p => p.MateriaId == id);
+                var materia = await _materiaService.GetMateria(id);
 
                 if (materia == null)
                 {
@@ -60,7 +61,7 @@ namespace TodoApp.Controllers
                     );
                 }
 
-                return materia;
+                return Ok(materia);
             }
             catch (Exception e)
             {
@@ -89,40 +90,30 @@ namespace TodoApp.Controllers
                 );
             }
 
-            _context.Entry(materia).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _materiaService.PutMateria(id, materia);
                 return Ok("Ok");
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MateriaExists(id))
-                {
-                    return NotFound(
-                        new ErrorResponse()
-                        {
-                            Codigo = 404,
-                            Error = "Materia no encontrada"
-                        }
-                    );
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(
+                    new ErrorResponse()
+                    {
+                        Codigo = 500,
+                        Error = "Error al actualizar la base de datos"
+                    }
+                );
             }
         }
 
         // POST: api/Materias
         [HttpPost]
-        public async Task<ActionResult<Materia>> PostMateria(Materia materia)
+        public async Task<IActionResult> PostMateria(Materia materia)
         {
             try
             {
-                _context.materias.Add(materia);
-                await _context.SaveChangesAsync();
+                await _materiaService.SaveMateria(materia);
 
                 return CreatedAtAction("GetMateria", new { id = materia.MateriaId }, materia);
             }
@@ -144,7 +135,7 @@ namespace TodoApp.Controllers
         {
             try
             {
-                var materia = await _context.materias.FindAsync(id);
+                var materia = await _materiaService.GetMateria(id);
                 if (materia == null)
                 {
                     return NotFound(
@@ -156,8 +147,7 @@ namespace TodoApp.Controllers
                     );
                 }
 
-                _context.materias.Remove(materia);
-                await _context.SaveChangesAsync();
+                await _materiaService.DeleteMateria(id);
 
                 return Ok(id);
             } 
@@ -171,11 +161,6 @@ namespace TodoApp.Controllers
                     }
                 );
             }
-        }
-
-        private bool MateriaExists(long id)
-        {
-            return _context.materias.Any(e => e.MateriaId == id);
         }
     }
 }
