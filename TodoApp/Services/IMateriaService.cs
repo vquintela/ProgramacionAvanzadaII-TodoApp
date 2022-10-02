@@ -10,7 +10,7 @@ namespace TodoApp.Services
 
         Task<Materia?> GetMateria(long id);
 
-        Task PutMateria(long id, Materia materia);
+        Task PutMateria(int id, Materia materia);
 
         Task DeleteMateria(int id);
     }

@@ -30,9 +30,20 @@ namespace TodoApp.Test.MocksData
         {
             return new Materia
             {
-                Nombre = "Lengu",
-                Descripcion = "Tareas de la materia Lengu"
-               
+                Nombre = "Fisica",
+                Descripcion = "Tareas de la materia Fisica"
+
+            };
+        }
+
+        public static Materia GetMateriaId()
+        {
+            return new Materia
+            {
+                MateriaId = 1,
+                Nombre = "Fisica",
+                Descripcion = "Tareas de la materia Fisica"
+
             };
         }
     }

@@ -77,7 +77,7 @@ namespace TodoApp.Controllers
 
         // PUT: api/Materias/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMateria(long id, Materia materia)
+        public async Task<IActionResult> PutMateria(int id, Materia materia)
         {
             if (id != materia.MateriaId)
             {

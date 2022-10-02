@@ -31,7 +31,7 @@ namespace TodoApp.Services
             return await _context.materias.Include(d => d.Tareas).FirstOrDefaultAsync(p => p.MateriaId == id);
         }
 
-        public async Task PutMateria(long id, Materia materia)
+        public async Task PutMateria(int id, Materia materia)
         {
             _context.Entry(materia).State = EntityState.Modified;
             await _context.SaveChangesAsync();
