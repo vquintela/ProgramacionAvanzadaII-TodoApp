@@ -14,6 +14,14 @@
 Todo App es una aplicacion para el manejo de las tareas del usuario. 
 Estas se agruparan por materias y podran ser eliminadas, actulizadas y cambiar su estado.
 
+**Hisrorias de usuario**
+
+Yo Como Cliente Quiero una lista de tareas para organizar mi tiempo
+Yo como usuario Quiero poder cargar una tarea
+Yo como usuario quiero poder editar una tarea
+Yo como usuario quiero poder eliminar una tarea
+Yo como usuario quiero poder diferenciar mis tareas por materia
+
 **Diagrama de Clases:**
 
 ![Alt text](Diagrama.jpeg?raw=true "Diagrama de clases")
