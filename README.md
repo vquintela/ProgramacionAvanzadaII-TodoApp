@@ -46,6 +46,10 @@ PM> Update-Database
 
 **Para levanter la App y la DB dentro de Docker:**
 
+Tener instalado Docker y Docker-compose
+
+Luego correr el siguiente comando:
+
 docker-compose up -d
 
 **Para testear el funcionamiento:**
