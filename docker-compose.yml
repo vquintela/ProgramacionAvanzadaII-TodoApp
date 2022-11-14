@@ -1,0 +1,27 @@
+# php:5.3, mysql:5.5, phpmyadmin:4.7
+version: '2'
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    restart: always
+    ports:
+      - '1433:1433'
+    volumes:
+      - "./datadb:/var/opt/mssql/data"
+    environment:
+     - ACCEPT_EULA=Y
+     - MSSQL_SA_PASSWORD=Stimpi01
+  api:
+    build:
+        context: ./
+        dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+    - mssql
+    links:
+    - mssql:mssql
+    restart: always
+    ports:
+      - '80:80'
+
